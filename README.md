@@ -1,21 +1,24 @@
 # grepx-split - LifeFlow Blood Camp deployment
 
-On the server (Linux, git, an SSH key GitHub accepts), one command installs or updates everything:
+On the server (Linux, git, an SSH key GitHub accepts):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/grepx-support/grepx-database-server-orchastrator/blood-donation/install.sh | bash
+git clone git@github.com:grepx-support/grepx-database-server-orchastrator.git
+cd grepx-database-server-orchastrator
+git checkout blood-donation
+./install.sh
 ```
 
-First time, add your site address and admin in front of `bash`:
+First time only, create your admin and set your site address:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/grepx-support/grepx-database-server-orchastrator/blood-donation/install.sh \
-  | SITE_URL=https://your.site ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='…' ADMIN_PHONE='9123 4567' bash
+cd grepx-blood-donation
+scripts/run.sh admin you@example.com YourPassword "Your Name" "9123 4567"
+nano .env        # SITE_URL=https://your.site, then: scripts/run.sh restart
 ```
 
-It clones this repo into ~/grepx-database-server-orchastrator, the four app repos next to the orchestrator, builds Nexus,
-sets everything up, generates the secrets in .env, migrates, starts and seeds. The app is then in
-~/grepx-database-server-orchastrator/grepx-blood-donation (`scripts/run.sh status | logs | restart`).
+Update later: `./install.sh` again (in grepx-database-server-orchastrator).
+Secrets in .env are generated automatically the first time.
 
 | Repo (cloned next to each other) | What |
 |---|---|

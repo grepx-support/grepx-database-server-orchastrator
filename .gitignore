@@ -1,0 +1,11 @@
+# grepx-split is the orchestrator: only orchestrator/ is committed here.
+# The repos it clones (each pushed on its own) and runtime output are not.
+/grepx-blood-donation/
+/grepx-platform/
+/grepx-services/
+/grepx-nexus-cpp/
+/grepx-blood-donation-backup/
+/libs/
+/logs/
+orchestrator/venv/
+__pycache__/

@@ -11,7 +11,7 @@ projects:
       - grepx-platform
       - grepx-services
       - grepx-nexus-cpp
-    deploy: ./deploy.sh --no-pull            # the orchestrator already pulled every repo
+    deploy: bash deploy.sh --no-pull            # the orchestrator already pulled every repo
     env:
       SKIP_INFRA: "0"                        # 1 = toolchain + database engines already installed
 dependencies:

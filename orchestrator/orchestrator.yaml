@@ -25,5 +25,5 @@ dependencies:
     dir: grepx-services
   grepx-nexus-cpp:
     url: git@github.com:grepx-support/grepx-nexus-cpp.git
-    branch: refactor
+    branch: master
     dir: grepx-nexus-cpp

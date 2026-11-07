@@ -1,28 +1,42 @@
 #!/usr/bin/env bash
-# Install or update LifeFlow Blood Camp on this server - run from this repo:   ./install.sh
-# Updates this repo, clones/updates the four app repos, builds Nexus, sets up, migrates, starts and seeds.
-# Needs: Linux, git, an SSH key on this server that GitHub accepts.
+# Install or update a GrepX project on this server - each project gets its own folder here, with its own repos and Nexus.
+#   ./install.sh blood-donation     install / update one project   (into ./blood-donation/)
+#   ./install.sh all                every project that is not skip: true
+#   ./install.sh -l                 list the projects               ./install.sh -h   this help
+#   add --fetch-only to only clone/update the repos.  Projects: orchestrator/projects/<name>.yaml
 set -euo pipefail
 cd "$(dirname "$0")"
-git config core.fileMode false          # scripts committed from Windows: the chmod below is not a local change
-git pull -q --ff-only || echo "(could not update this repo - continuing with what is checked out)"
-cd orchestrator
-# Debian/Ubuntu ship Python's venv separately. Test by really making one (importing ensurepip can succeed while
-# creating a venv still fails), install python3.X-venv if needed, and drop a half-made venv from a failed run.
-if ! [ -x venv/bin/python ] || ! venv/bin/python -m pip --version >/dev/null 2>&1; then
-  rm -rf venv
-  for py in python3.12 python3; do
-    command -v "$py" >/dev/null 2>&1 || continue
-    probe="$(mktemp -d)"
-    if ! "$py" -m venv "$probe/v" >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
-      ver="$("$py" -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')"
-      SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO=sudo
-      echo "installing python${ver}-venv (needed to create virtual environments)"
-      $SUDO apt-get update -qq && $SUDO apt-get install -y -qq "python${ver}-venv" python3-venv
-    fi
-    rm -rf "$probe"
+
+say() { printf '%s %-5s [%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" "install" "$2"; }
+die() { say ERROR "$1"; exit 1; }
+
+projects() {   # name, state and description of every project file (no Python needed)
+  for f in orchestrator/projects/*.yaml; do
+    [ -f "$f" ] || continue
+    name="$(basename "$f" .yaml)"
+    desc="$(sed -n 's/^description:[[:space:]]*//p' "$f" | head -1)"
+    state="ready"
+    if grep -qE '^skip:[[:space:]]*true' "$f"; then state="skip"; elif [ -d "$name" ]; then state="installed"; fi
+    printf '  %-20s %-10s %s\n' "$name" "$state" "$desc"
   done
+}
+usage() { sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'; echo; echo "Projects:"; projects; }
+
+case "${1:-}" in
+  ""|-h|--help) usage; exit 0 ;;
+  -l|--list) echo "Projects:"; projects; exit 0 ;;
+esac
+TARGET="$1"; shift
+if [ "$TARGET" != all ]; then
+  [ -f "orchestrator/projects/$TARGET.yaml" ] || { usage; die "unknown project '$TARGET'"; }
+  grep -qE '^skip:[[:space:]]*true' "orchestrator/projects/$TARGET.yaml" \
+    && die "'$TARGET' is skip: true in orchestrator/projects/$TARGET.yaml - set it to false to install it"
 fi
-chmod +x ./*.sh ../install.sh 2>/dev/null || true
-[ -d venv ] || bash setup.sh
-bash run.sh -p grepx-blood-donation
+
+git config core.fileMode false 2>/dev/null || true      # scripts committed from Windows: chmod is not a local change
+if git pull -q --ff-only 2>/dev/null; then say OK "orchestrator up to date"; else say WARN "could not update the orchestrator - using what is checked out"; fi
+chmod +x install.sh orchestrator/*.sh 2>/dev/null || true
+
+bash orchestrator/setup.sh
+VPY=orchestrator/venv/bin/python; [ -x "$VPY" ] || VPY=orchestrator/venv/Scripts/python.exe
+if [ "$TARGET" = all ]; then "$VPY" orchestrator/orchestrator.py -a "$@"; else "$VPY" orchestrator/orchestrator.py -p "$TARGET" "$@"; fi

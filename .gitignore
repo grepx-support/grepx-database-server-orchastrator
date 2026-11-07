@@ -1,14 +1,7 @@
-# grepx-split is the orchestrator: only orchestrator/ is committed here.
-# The repos it clones (each pushed on its own) and runtime output are not.
-/grepx-blood-donation/
-/grepx-platform/
-/grepx-services/
-/grepx-nexus-cpp/
-/grepx-blood-donation-backup/
-/libs/
-/logs/
+# Only the orchestrator is committed here. Each project folder holds that project's own repos (each pushed on its own).
+/*/
+!/orchestrator/
 orchestrator/venv/
+/logs/
 __pycache__/
-
-# prebuilt Nexus binary to copy to a server that cannot compile
 /nexus_server

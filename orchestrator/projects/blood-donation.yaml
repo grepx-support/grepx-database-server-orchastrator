@@ -1,0 +1,21 @@
+# LifeFlow Blood Camp - installed into <orchestrator root>/blood-donation/ with its own Nexus.
+description: LifeFlow Blood Camp
+skip: false
+folder: blood-donation
+repo:                                    # the workspace: deploy runs here, the other repos are linked into it
+  name: grepx-blood-donation
+  url: git@github.com:grepx-support/grepx-blood-donation.git
+  branch: main
+deploy: bash deploy.sh --no-pull         # the orchestrator already pulled every repo
+env:
+  SKIP_INFRA: "0"                        # 1 = toolchain + database engines already installed
+dependencies:                            # cloned next to the workspace, inside this project's folder
+  grepx-platform:
+    url: git@github.com:grepx-support/grepx-platform.git
+    branch: main
+  grepx-services:
+    url: git@github.com:grepx-support/grepx-services.git
+    branch: main
+  grepx-nexus-cpp:
+    url: git@github.com:grepx-support/grepx-nexus-cpp.git
+    branch: refactor

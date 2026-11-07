@@ -1,0 +1,21 @@
+# Kitchen app - template until its repo exists. Set skip: false and fill in the repo to install it.
+# Runs on the same platform with its own Nexus; give it its own ports (its config/services.ini and config/common.yaml
+# nexus port) if it shares a server with another project.
+description: GrepX Kitchen
+skip: true
+folder: kitchen
+repo:
+  name: grepx-kitchen
+  url: git@github.com:grepx-support/grepx-kitchen.git
+  branch: main
+deploy: bash deploy.sh --no-pull
+dependencies:
+  grepx-platform:
+    url: git@github.com:grepx-support/grepx-platform.git
+    branch: main
+  grepx-services:
+    url: git@github.com:grepx-support/grepx-services.git
+    branch: main
+  grepx-nexus-cpp:
+    url: git@github.com:grepx-support/grepx-nexus-cpp.git
+    branch: refactor
